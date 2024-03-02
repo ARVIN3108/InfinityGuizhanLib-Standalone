@@ -1,9 +1,7 @@
 package net.guizhanss.guizhanlib.slimefun.addon;
 
 import com.google.common.base.Preconditions;
-import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import lombok.Getter;
+import id.arvin3108.standalone.SlimefunAddonInstance;
 import net.guizhanss.guizhanlib.minecraft.utils.ChatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -20,10 +18,9 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 /**
- * An abstract {@link SlimefunAddon} class that contains
+ * An abstract {@link JavaPlugin} class that contains
  * the updater and some utilities.
  * <p>
  * Extend this as your main class to use them.
@@ -32,29 +29,21 @@ import java.util.regex.Pattern;
  *
  * @author Mooy1
  * @author ybw0014
+ * @author ARVIN3108
  */
 @ParametersAreNonnullByDefault
 @SuppressWarnings("ConstantConditions")
-public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon {
+public abstract class AbstractAddon extends JavaPlugin {
 
-    private static final Pattern GITHUB_PATTERN = Pattern.compile("[\\w-]+");
     private static final String NULL_LOG_LEVEL = "Log level cannot be null";
     private static final String NULL_LOG_MESSAGE = "Log message cannot be null";
 
     private static AbstractAddon instance;
 
     private final Environment environment;
-    @Getter
-    private final String githubUser;
-    @Getter
-    private final String githubRepo;
-    @Getter
-    private final String githubBranch;
     private final String autoUpdateKey;
-    private final String bugTrackerURL;
 
     private AddonConfig config;
-    private int slimefunTickCount;
     private Scheduler scheduler;
     private boolean loading;
     private boolean enabling;
@@ -64,18 +53,11 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
     /**
      * Live addon constructor.
      *
-     * @param githubUser    GitHub username of this project
-     * @param githubRepo    GitHub repository of this project
-     * @param githubBranch  GitHub branch of this project
      * @param autoUpdateKey Auto update key in the config
      */
-    protected AbstractAddon(String githubUser, String githubRepo, String githubBranch, String autoUpdateKey) {
+    protected AbstractAddon(String autoUpdateKey) {
         this.environment = Environment.LIVE;
-        this.githubUser = githubUser;
-        this.githubRepo = githubRepo;
-        this.githubBranch = githubBranch;
         this.autoUpdateKey = autoUpdateKey;
-        this.bugTrackerURL = MessageFormat.format("https://github.com/{0}/{1}/issues", githubUser, githubRepo);
         validate();
     }
 
@@ -86,14 +68,11 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
      * @param description   the {@link PluginDescriptionFile} of plugin
      * @param dataFolder    the {@link File} of plugin's data folder
      * @param file          the {@link File} of plugin
-     * @param githubUser    GitHub username of this project
-     * @param githubRepo    GitHub repository of this project
-     * @param githubBranch  GitHub branch of this project
      * @param autoUpdateKey Auto update key in the config
      */
     protected AbstractAddon(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file,
-                            String githubUser, String githubRepo, String githubBranch, String autoUpdateKey) {
-        this(loader, description, dataFolder, file, githubUser, githubRepo, githubBranch, autoUpdateKey, Environment.TESTING);
+                            String autoUpdateKey) {
+        this(loader, description, dataFolder, file, autoUpdateKey, Environment.TESTING);
     }
 
     /**
@@ -103,22 +82,14 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
      * @param description   the {@link PluginDescriptionFile} of plugin
      * @param dataFolder    the {@link File} of plugin's data folder
      * @param file          the {@link File} of plugin
-     * @param githubUser    GitHub username of this project
-     * @param githubRepo    GitHub repository of this project
-     * @param githubBranch  GitHub branch of this project
      * @param autoUpdateKey Auto update key in the config
      * @param environment   the {@link Environment} of file
      */
     AbstractAddon(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file,
-                  String githubUser, String githubRepo, String githubBranch, String autoUpdateKey,
-                  Environment environment) {
+                  String autoUpdateKey, Environment environment) {
         super(loader, description, dataFolder, file);
         this.environment = environment;
-        this.githubUser = githubUser;
-        this.githubBranch = githubBranch;
-        this.githubRepo = githubRepo;
         this.autoUpdateKey = autoUpdateKey;
-        this.bugTrackerURL = MessageFormat.format("https://github.com/{0}/{1}/issues", githubUser, githubRepo);
         validate();
     }
 
@@ -156,15 +127,6 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
     @Nonnull
     public static Scheduler getScheduler() {
         return getInstance().scheduler;
-    }
-
-    /**
-     * Returns the total number of Slimefun ticks that have occurred
-     *
-     * @return total number of Slimefun ticks
-     */
-    public static int getSlimefunTickCount() {
-        return getInstance().slimefunTickCount;
     }
 
     /**
@@ -246,15 +208,6 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
         if (instance != null) {
             throw new IllegalStateException("Addon " + instance.getName() + " is already using this GuizhanLib, Shade an relocate your own!");
         }
-        if (!GITHUB_PATTERN.matcher(githubUser).matches()) {
-            throw new IllegalArgumentException("Invalid githubUser");
-        }
-        if (!GITHUB_PATTERN.matcher(githubRepo).matches()) {
-            throw new IllegalArgumentException("Invalid githubRepo");
-        }
-        if (!GITHUB_PATTERN.matcher(githubBranch).matches()) {
-            throw new IllegalArgumentException("Invalid githubBranch");
-        }
     }
 
     /**
@@ -323,11 +276,6 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
         // Create Scheduler
         scheduler = new Scheduler(this);
 
-        // Create total tick count
-        if (environment == Environment.LIVE) {
-            scheduler.repeat(Slimefun.getTickerTask().getTickRate(), () -> slimefunTickCount++);
-        }
-
         // Call enable()
         try {
             enable();
@@ -355,7 +303,8 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
             handleException(e);
         } finally {
             disabling = false;
-            slimefunTickCount = 0;
+            if (SlimefunAddonInstance.isInitialized())
+                SlimefunAddonInstance.getSFAInstance().setSlimefunTickCount(0);
             setInstance(null);
             config = null;
         }
@@ -394,31 +343,6 @@ public abstract class AbstractAddon extends JavaPlugin implements SlimefunAddon 
             case LIVE -> ex.printStackTrace();
             case TESTING, LIB_TESTING -> throw ex;
         }
-    }
-
-    /**
-     * Used for Slimefun to get instance of this {@link JavaPlugin}
-     *
-     * @return the instance of this {@link JavaPlugin}
-     */
-    @Nonnull
-    @Override
-    public final JavaPlugin getJavaPlugin() {
-        return this;
-    }
-
-    /**
-     * This returns the default bug tracker URL by
-     * the given GitHub username and repository in constructor.
-     * <p>
-     * Override it if you don't use GitHub issues as bug tracker
-     *
-     * @return the default bug tracker url
-     */
-    @Nonnull
-    @Override
-    public String getBugTrackerURL() {
-        return bugTrackerURL;
     }
 
     /**

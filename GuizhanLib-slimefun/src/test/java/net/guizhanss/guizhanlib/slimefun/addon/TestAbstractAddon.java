@@ -2,17 +2,14 @@ package net.guizhanss.guizhanlib.slimefun.addon;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
+import id.arvin3108.standalone.SlimefunAddonInstance;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test for {@link AbstractAddon}, modified from InfinityLib.
@@ -59,7 +56,7 @@ public class TestAbstractAddon {
 
     @Test
     void testBugTrackerURL() {
-        assertEquals("https://github.com/ybw0014/GuizhanLib/issues", addon.getBugTrackerURL());
+        assertEquals("https://github.com/ybw0014/GuizhanLib/issues", SlimefunAddonInstance.getSFAInstance().getBugTrackerURL());
     }
 
     @Test
@@ -74,7 +71,7 @@ public class TestAbstractAddon {
 
     void testSlimefunTickCount() {
         server.getScheduler().performOneTick();
-        assertEquals(1, MockAddon.getSlimefunTickCount());
+        assertEquals(1, SlimefunAddonInstance.getSlimefunTickCount());
     }
 
     @Test

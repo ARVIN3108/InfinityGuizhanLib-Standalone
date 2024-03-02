@@ -1,5 +1,6 @@
 package net.guizhanss.guizhanlib.slimefun.addon;
 
+import id.arvin3108.standalone.SlimefunAddonInstance;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
@@ -20,16 +21,12 @@ public class MockAddon extends AbstractAddon {
 
     public MockAddon(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file,
                      Environment environment) {
-        super(
-            loader, description, dataFolder, file,
-            "ybw0014", "GuizhanLib", "master", "auto-upadte",
-            environment
-        );
+        super(loader, description, dataFolder, file, "auto-update", environment);
     }
 
     @Override
     protected void enable() {
-
+        new SlimefunAddonInstance("ybw0014", "GuizhanLib", "master").create();
     }
 
     @Override
