@@ -102,7 +102,10 @@ public class SlimefunAddonInstance implements SlimefunAddon {
         slimefunTickCount = tick;
     }
 
-    public void create() {
+    /**
+     * Used to initialize {@link SlimefunAddonInstance} after using the constructor
+     */
+    public void initialize() {
         // Create total tick count
         if (AbstractAddon.getInstance().getEnvironment() == Environment.LIVE) {
             AbstractAddon.getScheduler().repeat(Slimefun.getTickerTask().getTickRate(), () -> slimefunTickCount++);

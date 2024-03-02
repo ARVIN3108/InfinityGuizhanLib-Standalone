@@ -26,7 +26,7 @@ public class MockAddon extends AbstractAddon {
 
     @Override
     protected void enable() {
-        new SlimefunAddonInstance("ybw0014", "GuizhanLib", "master").create();
+        new SlimefunAddonInstance("ybw0014", "GuizhanLib", "master").initialize();
     }
 
     @Override
