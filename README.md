@@ -1,9 +1,14 @@
-# GuizhanLib
+# InfinityGuizhanLib (Standalone Edition)
 
 [![Maven Central](https://img.shields.io/maven-central/v/net.guizhanss/GuizhanLib.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22net.guizhanss%22%20AND%20a:%22GuizhanLib%22)
 
 A library that helps developing Slimefun addons and translate Slimefun addons to Simplified Chinese.  
 一个帮助粘液科技附属开发，并可以汉化粘液附属的库。
+
+## What's the difference with the original version?
+
+Actually, there is <b>almost no difference</b>. However, the implementation of the <b>[SlimefunAddon](https://github.com/Slimefun/Slimefun4/blob/master/src/main/java/io/github/thebusybiscuit/slimefun4/api/SlimefunAddon.java)</b> class is separate from
+the <b>[AbstractAddon](https://github.com/ARVIN3108/InfinityGuizhanLib-Standalone/blob/master/GuizhanLib-slimefun/src/main/java/net/guizhanss/guizhanlib/slimefun/addon/AbstractAddon.java)</b> class, and of course <b>there is [InfinityLib](https://github.com/Mooy1/InfinityLib) class as well</b>. This will be very useful for plugins that want to use <b>[InfinityLib](https://github.com/Mooy1/InfinityLib) and [GuizhanLib](https://github.com/ybw0014/GuizhanLib) simultaneously without having to call the [Slimefun](https://github.com/Slimefun/Slimefun4) API class</b>. This way, we can place Slimefun in a [soft-depend](https://docs.papermc.io/paper/dev/plugin-yml#softdepend) position in the Bukkit configuration file [plugin.yml](https://docs.papermc.io/paper/dev/plugin-yml).
 
 ## Usage | 如何使用
 
@@ -40,6 +45,10 @@ You will need to relocate the library classes if you use it for addon developmen
                         <relocation>
                             <pattern>net.guizhanss.guizhanlib</pattern>
                             <shadedPattern>(YOUR PACKAGE NAME HERE).guizhanlib</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>id.arvin3108.standalone</pattern>
+                            <shadedPattern>(YOUR PACKAGE NAME HERE).standalone</shadedPattern>
                         </relocation>
                     </relocations>
 
